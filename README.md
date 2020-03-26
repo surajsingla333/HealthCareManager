@@ -22,8 +22,11 @@ This will deploy the smart contracts on ganache development networks. Then goto 
 This will run the development server `localhost:3000`
 
 ### In Matic TestNet:
+
 host: https://testnetv3.matic.network
+
 Connect metamask with this host.
+
 goto `client/`
 
 > npm start
