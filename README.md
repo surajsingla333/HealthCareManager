@@ -2,17 +2,23 @@
 
 ## To run the project on development environment:
 
-### In Ganache:
+### In Ganache (in local machine):
 > port number: 6679
 
 Run the following commands in project directory,
+
+> npm install
 
 > truffle compiler
 
 > truffle migrate --reset
 
 This will deploy the smart contracts on ganache development networks. Then goto to `client/`
+
+> npm install
+
 > npm start
+
 This will run the development server `localhost:3000`
 
 ### In Matic TestNet:
