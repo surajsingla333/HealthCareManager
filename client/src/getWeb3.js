@@ -1,6 +1,7 @@
 import Portis from '@portis/web3';
 import Web3 from 'web3';
 
+// portis web
 
 const getWeb3 = () =>
   new Promise((resolve, reject) => {
