@@ -341,66 +341,27 @@ class Upload extends Component {
 
         </Container>
 
-        // <div style={{ marginLeft: "10px", paddingRight: "50px" }}>
-        //   <h2>Token Balance</h2>
-        //   <div>
-        //     {balance}
-        //   </div>
-
-        //   <h2>Change fee</h2>
-        //   <Form onSubmit={this.changeFee.bind(this)}>
-
-        //     <Form.Group controlId="fee">
-        //       <Form.Label>Your new fee</Form.Label>
-        //       <Form.Control type="text" placeholder="Enter your fee amount" ref='doctorNewFee' />
-        //     </Form.Group>
-
-        //     <Button variant="primary" type="submit">Submit</Button>
-
-        //   </Form>
-
-        //   <h2>Add Prescription for the patient</h2>
-        //   <Form onSubmit={this.addFile.bind(this)}>
-
-        //     <Form.Group controlId="addressPat">
-        //       <Form.Label>Patient's Address</Form.Label>
-        //       <Form.Control type="text" placeholder="Enter Patient's Address" ref='patientAdd' />
-        //     </Form.Group>
-
-        //     <Form.Group controlId="patientFile">
-        //       <Form.Label>Patient's File Hash</Form.Label>
-        //       <Form.Control type="text" placeholder="Enter File Hash" ref='patientFileHash' />
-        //     </Form.Group>
-
-        //     <a className="button browse blue">Browse</a>
-        //     <input
-        //       type='file' label='Upload' accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf, application/docx" ref='fileUpload'
-        //     />
-
-        //     <Button variant="primary" type="submit">Submit</Button>
-
-        //   </Form>
-
-        //   <h2>List All Files</h2>
-        //   <div>
-        //     <ul>
-        //       <hr />
-        //       {patientAndFileList}
-        //       {/* {fileList} */}
-        //     </ul>
-        //   </div>
-
-        // </div>
-
       );
     }
     else {
       return (
-        <div style={{ marginLeft: "10px", paddingRight: "50px" }}>
-          <h2>You are not a Doctor</h2>
-          <p>Your Address: {this.state.acc}</p>
-          <p>Owner Is : {this.props.state.owner}</p>
-        </div>
+        <Container>
+          <Row>
+            <Col>
+              <Card>
+                <Card.Body>
+                  <Card.Title>You are not a Doctor</Card.Title>
+                  <Card.Text>
+                    <ListGroup>
+                      <ListGroup.Item>Your Address: {this.state.acc}</ListGroup.Item>
+                      <ListGroup.Item>Owner Address: {this.props.state.owner}</ListGroup.Item>
+                    </ListGroup>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
       )
     }
   }
