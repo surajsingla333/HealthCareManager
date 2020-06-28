@@ -15,7 +15,6 @@ class Menu extends React.Component {
                         {/* <NavLink to="/upload" style={{padding: '5px', color: 'white'}}>Upload</NavLink> */}
                         <NavLink to="/register" style={{padding: '5px', color: 'white'}}>Register</NavLink>
                         <NavLink to="/patient" style={{padding: '5px', color: 'white'}}>Patient</NavLink>
-                        <NavLink to="/" style={{padding: '5px', color: 'white'}}>Home</NavLink>
                         <NavLink to="/download" style={{padding: '5px', color: 'white'}}>Download</NavLink>
                         <NavLink to="/owner" style={{padding: '5px', color: 'white'}}>Owner</NavLink>
                         {/* <NavLink to="/admin" style={{padding: '5px', color: 'white'}}>Admin </NavLink> */}

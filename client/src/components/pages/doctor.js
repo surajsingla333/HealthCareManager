@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Form, Button } from 'react-bootstrap';
+
+import { Form, Button, Container, Row, Col, Card, ListGroup, Table } from 'react-bootstrap';
 
 import AES from 'crypto-js/aes';
 import ipfs from '../../ipfs';
@@ -203,14 +204,24 @@ class Upload extends Component {
 
       // });
 
-      patientAndFileList = uniquePatient.length == 0 ? function () { console.log(uniquePatient.length); return <div>"No Data"</div> } :
+      patientAndFileList = uniquePatient.length == 0 ? function () {
+        console.log(uniquePatient.length); return (
+          <Container>
+            <Row>
+              <Col>
+                "No Data"
+        </Col>
+            </Row>
+          </Container>)
+      } :
         uniquePatient.map(function (file, index) {
           console.log(uniquePatient.length);
           console.log("GETTING LENGTH");
           return (
             uniqueDocuments[index].map(function (hash, idx) {
               console.log("DOC RETURN");
-              return <div key={index}><p> Patient Address : {file},</p><p> Shared File : {hash}</p> <hr /> </div>
+              return <tr><td>{file} </td><td>{hash}</td></tr>
+              // return <div key={index}><p> Patient Address : {file},</p><p> Shared File : {hash}</p> <hr /> </div>
             })
           )
 
@@ -221,62 +232,165 @@ class Upload extends Component {
 
     if (this.state.acc === null) {
       return (
-        <div style={{ marginLeft: "10px", paddingRight: "50px" }}>Loading...</div>
+        <Container>
+          <Row>
+            <Col>
+              Loading...
+            </Col>
+          </Row>
+        </Container>
       )
     }
     else if (this.state.isDoctor === true) {
 
       return (
 
-        <div style={{ marginLeft: "10px", paddingRight: "50px" }}>
-          <h2>Token Balance</h2>
-          <div>
-            {balance}
-          </div>
-          <h2>Change fee</h2>
-          <Form onSubmit={this.changeFee.bind(this)}>
+        <Container>
 
-            <Form.Group controlId="fee">
-              <Form.Label>Your new fee</Form.Label>
-              <Form.Control type="text" placeholder="Enter your fee amount" ref='doctorNewFee' />
-            </Form.Group>
+          <Row style={{ marginBottom: 15 }}>
+            <Col md={{ span: 3 }}>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Token Balance</Card.Title>
+                  <Card.Text>
+                    <ListGroup>
+                      <ListGroup.Item>{balance} ETH</ListGroup.Item>
+                    </ListGroup>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
 
-            <Button variant="primary" type="submit">Submit</Button>
+            <Col>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Change fee</Card.Title>
+                  <Card.Text>
+                    <Form onSubmit={this.changeFee.bind(this)}>
 
-          </Form>
+                      <Form.Group controlId="fee">
+                        <Form.Label>Your new fee</Form.Label>
+                        <Form.Control type="text" placeholder="Enter your fee amount" ref='doctorNewFee' />
+                      </Form.Group>
 
-          <h2>Add Prescription for the patient</h2>
-          <Form onSubmit={this.addFile.bind(this)}>
+                      <Button variant="primary" type="submit">Submit</Button>
 
-            <Form.Group controlId="addressPat">
-              <Form.Label>Patient's Address</Form.Label>
-              <Form.Control type="text" placeholder="Enter Patient's Address" ref='patientAdd' />
-            </Form.Group>
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
 
-            <Form.Group controlId="patientFile">
-              <Form.Label>Patient's File Hash</Form.Label>
-              <Form.Control type="text" placeholder="Enter File Hash" ref='patientFileHash' />
-            </Form.Group>
+          </Row>
 
-            <a className="button browse blue">Browse</a>
-            <input
-              type='file' label='Upload' accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf, application/docx" ref='fileUpload'
-            />
 
-            <Button variant="primary" type="submit">Submit</Button>
+          <Row style={{ marginBottom: 15 }}>
+            <Col>
+              <Card>
+                <Card.Body>
+                  <Card.Title>Add Prescription for the patient</Card.Title>
+                  <Card.Text>
+                    <Form onSubmit={this.addFile.bind(this)}>
 
-          </Form>
+                      <Form.Group controlId="addressPat">
+                        <Form.Label>Patient's Address</Form.Label>
+                        <Form.Control type="text" placeholder="Enter Patient's Address" ref='patientAdd' />
+                      </Form.Group>
 
-          <h2>List All Files</h2>
-          <div>
-            <ul>
-            <hr />
-              {patientAndFileList}
-              {/* {fileList} */}
-            </ul>
-          </div>
+                      <Form.Group controlId="patientFile">
+                        <Form.Label>Patient's File Hash</Form.Label>
+                        <Form.Control type="text" placeholder="Enter File Hash" ref='patientFileHash' />
+                      </Form.Group>
 
-        </div>
+                      <a className="button browse blue">Browse  </a>
+                      <input
+                        type='file' label='Upload' accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf, application/docx" ref='fileUpload'
+                      />
+
+                      <Button variant="primary" type="submit">Submit</Button>
+
+                    </Form>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row style={{ marginBottom: 15 }}>
+            <Col>
+              <Card>
+                <Card.Body>
+                  <Card.Title>List All Files</Card.Title>
+                  <Card.Text>
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>Patient</th>
+                          <th>Files</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {patientAndFileList}
+                      </tbody>
+                    </Table>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+        </Container>
+
+        // <div style={{ marginLeft: "10px", paddingRight: "50px" }}>
+        //   <h2>Token Balance</h2>
+        //   <div>
+        //     {balance}
+        //   </div>
+
+        //   <h2>Change fee</h2>
+        //   <Form onSubmit={this.changeFee.bind(this)}>
+
+        //     <Form.Group controlId="fee">
+        //       <Form.Label>Your new fee</Form.Label>
+        //       <Form.Control type="text" placeholder="Enter your fee amount" ref='doctorNewFee' />
+        //     </Form.Group>
+
+        //     <Button variant="primary" type="submit">Submit</Button>
+
+        //   </Form>
+
+        //   <h2>Add Prescription for the patient</h2>
+        //   <Form onSubmit={this.addFile.bind(this)}>
+
+        //     <Form.Group controlId="addressPat">
+        //       <Form.Label>Patient's Address</Form.Label>
+        //       <Form.Control type="text" placeholder="Enter Patient's Address" ref='patientAdd' />
+        //     </Form.Group>
+
+        //     <Form.Group controlId="patientFile">
+        //       <Form.Label>Patient's File Hash</Form.Label>
+        //       <Form.Control type="text" placeholder="Enter File Hash" ref='patientFileHash' />
+        //     </Form.Group>
+
+        //     <a className="button browse blue">Browse</a>
+        //     <input
+        //       type='file' label='Upload' accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/pdf, application/docx" ref='fileUpload'
+        //     />
+
+        //     <Button variant="primary" type="submit">Submit</Button>
+
+        //   </Form>
+
+        //   <h2>List All Files</h2>
+        //   <div>
+        //     <ul>
+        //       <hr />
+        //       {patientAndFileList}
+        //       {/* {fileList} */}
+        //     </ul>
+        //   </div>
+
+        // </div>
 
       );
     }
