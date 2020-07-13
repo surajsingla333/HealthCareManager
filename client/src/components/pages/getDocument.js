@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { findDOMNode } from "react-dom";
 
-import { Form, Button, Container, Row, Col, Card, ListGroup, Table } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
 
 import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-latin1';
@@ -60,7 +60,6 @@ class Download extends Component {
             <Card>
               <Card.Body>
                 <Card.Title>Download Data File</Card.Title>
-                <Card.Text>
                   <Form onSubmit={this.getFile.bind(this)}>
 
                     <Form.Group controlId="fileHash">
@@ -74,7 +73,6 @@ class Download extends Component {
 
                   </Form>
                   <small style={{ marginLeft: "5px" }}>If file type is not automatically detected, then save it with '.docx' extention</small>
-                </Card.Text>
               </Card.Body>
             </Card>
           </Col>

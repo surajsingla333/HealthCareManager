@@ -6,19 +6,6 @@ const initState = {
     tokenContract: null
 };
 
-const getCircularReplacer = () => {
-    const seen = new WeakSet();
-    return (key, value) => {
-      if (typeof value === "object" && value !== null) {
-        if (seen.has(value)) {
-          return false;
-        }
-        seen.add(value);
-      }
-      return value;
-    };
-  };
-
 const rootReducer = (state = initState, action) => {
     console.log("ACTION\n", action);
 
@@ -39,16 +26,16 @@ const rootReducer = (state = initState, action) => {
         // localStorage.setItem("CONTRACT", JSON.stringify(s.contract.methods));
         // localStorage.setItem("TOKENCONTRACT", JSON.stringify(s.tokenContract.methods));
 
-        return s
+        return s;
     }
 
     if (action.type === "ACCOUNT_CHANGE") {
-        var s = {
+        var s2 = {
             ...state,
             account: action.state.account,
         }
         // localStorage.setItem("STATE", JSON.stringify(s));
-        return s
+        return s2;
     }
 
     // localStorage.setItem("STATE", JSON.stringify(state));

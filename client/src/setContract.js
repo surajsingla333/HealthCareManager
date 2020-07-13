@@ -20,7 +20,6 @@ import { connect } from 'react-redux';
 import App from './App'
 
 import "./App.css";
-import routes from "./routes.js";
 
 class SetContract extends Component {
 

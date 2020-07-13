@@ -1,8 +1,14 @@
 import React, { Component } from "react";
-import { Form, Button, Container, Row, Col, Card, ListGroup, Table } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Card, ListGroup } from 'react-bootstrap';
 
 import AES from 'crypto-js/aes';
 import ipfs from '../../ipfs';
+
+import rsaDecrypt from '../../utils/rsaDecrypt';
+import rsaEncrypt from '../../utils/rsaEncrypt';
+import genHash from '../../utils/genHash';
+
+import DataCardPatient from '../cards/DataCardPatient';
 
 import "../../App.css";
 
@@ -12,44 +18,89 @@ class Upload extends Component {
 
   state = {
     acc: null,
+    publicKey: null,
     encrypted: null,
+    generatedHash: null,
     hash: null,
     files: [],
     prescriptions: [],
     balance: 0,
     isPatient: false,
+    allHashes: [],
+    decryptForm: false
   };
 
 
-  componentDidMount() {
+  async componentDidMount() {
     console.log("PROPS IN UPLOAD", this.props);
     console.log("STATE IN UPLOAD", this.state);
 
     var inst = this.props.state.contract;
-    var token = this.props.state.tokenContract;
+    try {
+      let currAccount = await this.props.state.web3.eth.getAccounts();
+      let pubKey = await inst.methods.getPublicKey(currAccount.toString()).call({ from: currAccount.toString() });
+      let pat = await inst.methods.isPatient(currAccount.toString()).call({ from: currAccount.toString() });
 
-    this.props.state.web3.eth.getAccounts().then(function (acc) {
-      console.log("ACCOUNT", acc);
-      console.log(inst);
-      console.log(inst.methods);
-      this.setState({ acc: acc })
-      console.log("STATE", this.state);
-      return inst.methods.isPatient(acc.toString()).call({ from: acc.toString() });
-    }.bind(this)).then(function (pat) {
-      this.setState({ isPatient: pat })
-      return token.methods.balanceOf(this.state.acc.toString()).call({ from: this.state.acc.toString() });
-    }.bind(this)).then(function (bal) {
-      this.setState({ balance: bal })
-      return inst.methods.allPatientsData().call({ from: this.state.acc.toString() })
-    }.bind(this)).then(function (res) {
-      this.setState({ files: res });
-      return inst.methods.allPrescriptions().call({ from: this.state.acc.toString() });
-    }.bind(this)).then(function (presc) {
-      this.setState({ prescriptions: presc });
-    }.bind(this)).catch(function (err) {
-      console.log("Not a Patient", err);
+      let allDataHash = await inst.methods.allPatientsDataHash().call({ from: currAccount.toString() });
+
+      let allData = [];
+      for (let i = 0; i < allDataHash.length; i++) {
+
+        let prescriptions = await inst.methods.getPatientDataDetails(allDataHash[i].toString()).call({ from: currAccount.toString() });
+        allData.push(prescriptions);
+
+      }
+      this.setState({
+        acc: currAccount,
+        publicKey: pubKey,
+        isPatient: pat,
+        allHashes: allDataHash,
+        files: allData,
+      })
+
+
+    } catch (err) {
+      console.log("ERROR IN PATIENT MOUNT", err);
+    }
+  }
+
+
+  async generateHash(e) {
+    e.preventDefault();
+    // const pk = this.refs.encryptPK.value;
+    const msg = this.refs.encryptMessage.value;
+    var res = await genHash(msg);
+    console.log("RES IN ENCRYPT", res);
+    this.setState({
+      generatedHash: res.toString(),
     })
   }
+
+  async encrypt(e) {
+    e.preventDefault();
+    const pk = this.refs.encryptPK.value;
+    const msg = this.refs.encryptMessage.value;
+    var res = await rsaEncrypt(this.state.acc.toString(), pk, msg);
+    console.log("RES IN ENCRYPT", res);
+    this.setState({
+      completeEncrypt: res.toString(),
+      encryptedMessage: res.data.toString(),
+    })
+  }
+
+  async decrypt(e) {
+    e.preventDefault();
+    const pk = this.refs.decryptPK.value;
+
+    var res = await rsaDecrypt(this.state.acc.toString(), pk, this.state.encryptedMessage);
+    console.log("RES IN ENCRYPT", res);
+    this.setState({
+      completeDecrypt: res.toString(),
+      decryptedMessage: res.data.toString(),
+    })
+  }
+
+
 
   loadHash() {
 
@@ -82,8 +133,6 @@ class Upload extends Component {
     reader.onloadend = () => {
 
       console.log("RES", reader.result);
-
-      var salt = 10;
 
       var r = AES.encrypt(reader.result, "qwertyuiop");
 
@@ -119,74 +168,175 @@ class Upload extends Component {
     this.encryptFile(file);
   }
 
-  sendFile(e) {
+  async addFile2(e) {
     e.preventDefault();
-    const fileHash = this.refs.fileHash.value;
-    const doctor = this.refs.docAdd.value;
+
+    const file = this.refs.patientQuery.value;
+    console.log(file, "\n\n");
 
     var inst = this.props.state.contract;
 
+    var acc = this.state.acc.toString();
+    var publicKey = this.state.publicKey.toString();
+    // await inst.methods.getPublicKey(acc).call({ from: acc });
+    var uniqueHash = await genHash(file);
+    console.log("GENERATED HASH", uniqueHash);
+    var encrypt = await rsaEncrypt(acc, publicKey, file);
+    console.log("RES IN ENCRYPT", encrypt);
 
-    this.props.state.web3.eth.getAccounts().then(function (acc) {
-      // this.sendReq(acc);
-      console.log("ACCOUNT", acc);
-      console.log(inst);
-      console.log(inst.methods);
-      this.setState({ acc: acc })
-      console.log("STATE", this.state);
-      return inst.methods.docFee(doctor.toString()).call({ from: this.state.acc.toString() });
-    }.bind(this)).then(function (fee) {
-      console.log("FEE", fee);
-      return inst.methods.sendFile(doctor.toString(), fileHash.toString(), fee).send({ from: this.state.acc.toString() })
-    }.bind(this)).then(function (res) {
-      console.log("AFTER FUNCTION", res)
-    }).catch(function (err) {
-      console.log("ERROR", err);
-    })
+    if (encrypt.result) {
+
+      // console.log("STATE IN UPLOAD", this.state);
+      try {
+        var res = await inst.methods.addFile(uniqueHash.toString(), encrypt.data.toString()).send({ from: acc });
+        console.log("After Call", res);
+      }
+      catch (err) {
+        console.log("Error", err);
+      }
+
+    }
+
+    else {
+      alert(encrypt.data.toString());
+    }
+
+
+    // this.setState({
+    //   completeEncrypt: res.toString(),
+    //   encryptedMessage: res.data.toString(),
+    // })
+
+  }
+
+  async sendFile(e) {
+    e.preventDefault();
+
+    const fileHash = this.refs.fileHash.value.toString();
+    const doctor = this.refs.docAdd.value.toString();
+    const userPrivate = this.refs.userPk.value.toString();
+
+    var inst = this.props.state.contract;
+
+    console.log("IN SEND FILE");
+
+    var file = this.state.files.filter(r => r.hashData.toString() === fileHash);
+    //   {
+
+    //   if (r.hashData.toString() === fileHash) {
+    //     console.log("R", r);
+    //     console.log("RQUERY", r.query);
+    //     return r.query
+    //   };
+    // })
+
+    console.log("GET FILE", file[0].query);
+    // setTimeout(async () => {
+    try {
+      var decrypted = await rsaDecrypt(this.state.publicKey.toString(), userPrivate, file[0].query);
+
+      if (decrypted.result) {
+
+        console.log("DECRYPTED DATA", decrypted.data);
+
+        var doctorPublic = await inst.methods.getPublicKey(doctor).call({ from: this.state.acc.toString() });
+
+        var encrypted = await rsaEncrypt(doctor, doctorPublic.toString(), decrypted.data);
+
+        if (encrypted.result) {
+          console.log("ENCRYPTED DATA", encrypted.data);
+
+          try {
+
+            var fileSent = await inst.methods.sendFile(doctor, fileHash, encrypted.data).send({ from: this.state.acc.toString() })
+
+            console.log("After Call", fileSent);
+          }
+          catch (err) {
+            console.log("Error IN FILE SEND", err);
+          }
+        }
+        else {
+          alert(encrypted.data);
+        }
+      }
+      else {
+        alert(decrypted.data);
+      }
+    } catch (err) {
+      console.log("ERROR in SEND FUNCTINO", err);
+      alert("FUNCTINO NOT CALLED");
+    }
+
+    //   // rsaDecrypt
+    //   // rsaEncrypt
+    // }, 100);
+
+
+
+    // this.props.state.web3.eth.getAccounts().then(function (acc) {
+    //   // this.sendReq(acc);
+    //   console.log("ACCOUNT", acc);
+    //   console.log(inst);
+    //   console.log(inst.methods);
+    //   this.setState({ acc: acc })
+    //   console.log("STATE", this.state);
+    //   return inst.methods.docFee(doctor.toString()).call({ from: this.state.acc.toString() });
+    // }.bind(this)).then(function (fee) {
+    //   console.log("FEE", fee);
+    //   return inst.methods.sendFile(doctor.toString(), file.toString(), fee).send({ from: this.state.acc.toString() })
+    // }.bind(this)).then(function (res) {
+    //   console.log("AFTER FUNCTION", res)
+    // }).catch(function (err) {
+    //   console.log("ERROR", err);
+    // })
+  }
+
+  changeDecrypt(e) {
+    e.preventDefault();
+    this.setState({ decryptForm: true })
+  }
+
+  decryptFormHandle(e) {
+    e.preventDefault();
+    this.setState({ decryptForm: false })
   }
 
   render() {
 
     var files = this.state.files;
 
-    console.log(files);
+    console.log("FILEs", files);
+    if (files.length) {
+      console.log("FILEs", files[0]);
+      console.log("FILEs", files[0].doctor);
+      console.log("FILEs", files[0].hashData);
+      console.log("FILEs", files[0].prescription);
+      console.log("FILEs", files[0].query);
+      console.log("FILEs", JSON.parse(files[0].query));
+      console.log("FILEs", JSON.parse(files[0].query).ciphertext);
+    }
 
-    var fileList = files.length == 0 ? function () {
+    let thi = this
+
+    var fileList = files.length === 0 ? function () {
       console.log(files.length); return (
-        <Container>
-          <Row>
-            <Col>
-              "No Data"
-        </Col>
-          </Row>
-        </Container>)
+        <h1>NO DATA</h1>)
     } : files.map(function (file, index) {
-      console.log(files.length);
-      return <ListGroup.Item key={index}>{file}</ListGroup.Item>
-    });
+      console.log("FILES LENGTH", files.length);
+      console.log("FILES", files);
+      let data = JSON.parse(file.query).ciphertext;
+      let doc = file.doctor.toString() === '0x0000000000000000000000000000000000000000' ? '-' : file.doctor.toString();
+      let prescription = file.prescription === "" ? "-" : JSON.parse(file.prescription).ciphertext;
 
-    var prescription = this.state.prescriptions;
 
-    console.log(prescription);
+      return (
 
-    var prescriptionList = prescription.length == 0 ? function () {
-      console.log(prescription.length); return (
-        <Container>
-          <Row>
-            <Col>
-              "No Data"
-          </Col>
-          </Row>
-        </Container>)
-    } : prescription.map(function (file, index) {
-      console.log(prescription.length);
-      console.log("PRESCRIPTIONS", file)
-      return <tr><td>{file[0]} </td><td>{file[1]}</td></tr>
-      // return <ListGroup.Item key={index}>File: {file[0]}              Prescription: {file[1]}</ListGroup.Item>
+        <DataCardPatient cardQuery={file.query} cardPrescription={file.prescription} doctor={doc} hashData={file.hashData} data={data} prescription={prescription} publicKey={thi.state.publicKey.toString()} />
+      )
     });
 
     var balance = this.state.balance;
-
 
     if (this.state.acc === null) {
       return (
@@ -205,25 +355,28 @@ class Upload extends Component {
 
         <Container>
 
-          <Row style={{marginBottom: 15}}>
-            <Col>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Token Balance</Card.Title>
-                  <Card.Text>
-                    <ListGroup>
-                      <ListGroup.Item>{balance} ETH</ListGroup.Item>
-                    </ListGroup>
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
+          <Row style={{ marginBottom: 15 }}>
 
             <Col>
               <Card>
                 <Card.Body>
                   <Card.Title>ADD Data file in Excel</Card.Title>
-                  <Card.Text>
+                    <Form onSubmit={this.addFile2.bind(this)}>
+                      <Form.Group controlId="addressPat">
+                        <Form.Label>Your Query</Form.Label>
+                        <Form.Control type="text" placeholder="Enter your query" ref='patientQuery' />
+                      </Form.Group>
+
+                      <Button variant="primary" type="submit">Submit</Button>
+                    </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* <Col>
+              <Card>
+                <Card.Body>
+                  <Card.Title>ADD Data file in Excel</Card.Title>
                     <Form onSubmit={this.addFile.bind(this)}>
                       <a className="button browse blue">Browse     </a>
                       <input
@@ -231,35 +384,31 @@ class Upload extends Component {
                       />
                       <Button variant="primary" type="submit">Submit</Button>
                     </Form>
-                  </Card.Text>
                 </Card.Body>
               </Card>
-            </Col>
+            </Col> */}
 
           </Row>
 
 
-          <Row style={{marginBottom: 15}}>
+          <Row style={{ marginBottom: 15 }}>
             <Col>
               <Card>
                 <Card.Body>
                   <Card.Title>List All Files</Card.Title>
-                  <Card.Text>
-                    <ListGroup>
+                    <Row>
                       {fileList}
-                    </ListGroup>
-                  </Card.Text>
+                    </Row>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
 
-          <Row style={{marginBottom: 15}}>
+          <Row style={{ marginBottom: 15 }}>
             <Col>
               <Card>
                 <Card.Body>
                   <Card.Title>Send File to doctor</Card.Title>
-                  <Card.Text>
                     <Form onSubmit={this.sendFile.bind(this)}>
 
                       <Form.Group controlId="fileHash">
@@ -272,38 +421,18 @@ class Upload extends Component {
                         <Form.Control type="text" placeholder="Enter Doctor's Address" ref='docAdd' />
                       </Form.Group>
 
+                      <Form.Group controlId="addressDoc">
+                        <Form.Label>Your Private Key</Form.Label>
+                        <Form.Control type="text" placeholder="Enter your private key" ref='userPk' />
+                      </Form.Group>
+
                       <Button variant="primary" type="submit">Submit</Button>
 
                     </Form>
-                  </Card.Text>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
-
-          <Row style={{marginBottom: 15}}>
-            <Col>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Prescriptions Sent</Card.Title>
-                  <Card.Text>
-                    <Table striped bordered hover>
-                      <thead>
-                        <tr>
-                          <th>File</th>
-                          <th>Prescription</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {prescriptionList}
-                      </tbody>
-                    </Table>
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
         </Container>
 
       );
@@ -316,12 +445,10 @@ class Upload extends Component {
               <Card>
                 <Card.Body>
                   <Card.Title>You are not a patient</Card.Title>
-                  <Card.Text>
                     <ListGroup>
                       <ListGroup.Item>Your Address: {this.state.acc}</ListGroup.Item>
                       <ListGroup.Item>Owner Address: {this.props.state.owner}</ListGroup.Item>
                     </ListGroup>
-                  </Card.Text>
                 </Card.Body>
               </Card>
             </Col>

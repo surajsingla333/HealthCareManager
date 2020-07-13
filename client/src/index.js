@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter } from 'react-router-dom'
@@ -10,7 +9,6 @@ import {createStore} from 'redux';
 import rootReducer from './reducers/rootReducer';
 // import persistedState from './reducers/LOAD_INITIAL_STATE';
 // import saveToLocalStorage from './reducers/SAVE_INITIAL_STATE';
-import routes from './routes';
 import SetContract from './setContract';
 
 const store = createStore(rootReducer);

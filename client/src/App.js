@@ -1,12 +1,9 @@
 import React, { Component } from "react";
-import getWeb3 from "./getWeb3";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { connect } from 'react-redux';
 
 import Menu from './components/menu';
-
-import { setContract } from './setContract';
 
 
 import "./App.css";

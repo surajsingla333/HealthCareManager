@@ -1,7 +1,5 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { Navbar, Nav } from 'react-bootstrap';
 
 class Menu extends React.Component {
