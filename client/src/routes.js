@@ -22,8 +22,7 @@ const Status = function ({ code, children }) {
 const NotFound = function () {
   return (
     <Status code={404}>
-      <div>
-        <h2> Sorry, cannot find this page</h2>
+      <div><h2> Sorry, cannot find this page</h2>
       </div>
     </Status>
   )
@@ -36,9 +35,9 @@ const routes = (
       <Route exact={true} path="/" component={Home} />
       <Route path="/register" component={Register} />
       <Route path='/patient' component={Patient} />
-      <Route path='/owner' component ={Owner} />
-      <Route path='/download' component={Download}/>
-      <Route path='/doctor' component={Doctor}/>
+      <Route path='/owner' component={Owner} />
+      <Route path='/download' component={Download} />
+      <Route path='/doctor' component={Doctor} />
       <Route component={NotFound} />
     </Switch>
   </div>
