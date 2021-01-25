@@ -25413,7 +25413,7 @@
     }
   },
   "schemaVersion": "3.0.23",
-  "updatedAt": "2020-07-26T08:22:41.844Z",
+  "updatedAt": "2021-01-25T07:35:50.612Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {
