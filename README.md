@@ -23,7 +23,7 @@ This will run the development server `localhost:3000`
 
 ### In Matic TestNet:
 
-host: https://testnetv3.matic.network
+host: https://rpc-mumbai.matic.today
 
 Connect metamask with this host.
 
@@ -34,27 +34,9 @@ goto `client/`
 ## Testing Details:
 
 Live Demo: https://tender-mclean-a3d648.netlify.com/
-Matic TestNet link: https://testnetv3.matic.network
-HealthToken Contract Address: 0x54d28562271De782B261807a01d1D2fb97417912
-HealthCare Contract Address: 0x3750bE154260872270EbA56eEf89E78E6E21C1D9 
-
-Owner (The account that deployed the contract):
-
-Address:  0x2B522cABE9950D1153c26C1b399B293CaA99FcF9
-
-Private Key: 1aba488300a9d7297a315d127837be4219107c62c61966ecdf7a75431d75cc61
-
-Doctor:  
-
-Address: 0x613e91209393D3adF227ddeFfd5A4FC3426733D4
-
-Private Key: d5797f17a2be6ea0ac5086651a68b8913fab126bacabbd7fe08f0a1c8bf339e6
-
-Patient: 
-
-Address: 0x5Bf426E32d5D2691f4c06e0dE12FeC7B482acBc8
-
-Private Key: fbdb73a66289349b731b86b18780f44496ba55d6d994e09b3682e0ffc46bbf6b
+Matic TestNet link: https://rpc-mumbai.matic.today
+HealthToken Contract Address: 0xc1F6451D106330340e27F89bbcdc02Da70CB5b35
+HealthCare Contract Address: 0x0fcF2235F27410EC94C612C2F4c164f7BdC9DEdE 
 
 ### Project in action - https://youtu.be/7PfkENkE5F0
 

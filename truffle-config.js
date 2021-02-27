@@ -1,5 +1,6 @@
 const path = require("path");
 const HDWalletProvider = require('truffle-hdwallet-provider');
+const mnemonic = require('./constants')
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -15,13 +16,12 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     matic: {
-      provider: function() {
-        return new HDWalletProvider("gesture rather obey video awake genuine patient base soon parrot upset lounge", 'https://testnetv3.matic.network', 0,1)
+        provider: () => new HDWalletProvider(mnemonic.MNEMONIC, `https://rpc-mumbai.matic.today`),
+        network_id: 80001,
+        confirmations: 2,
+        timeoutBlocks: 200,
+        skipDryRun: true
       },
-      network_id: 15001,
-      gas: 8000000,
-      gasPrice: 0,
-    },
 
     rinkeby: {
       provider: () => new HDWalletProvider(process.env.MNEMONIC, `https://rinkeby.infura.io/v3/${process.env.INFURA_API}`),
